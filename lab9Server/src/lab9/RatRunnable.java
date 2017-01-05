@@ -10,7 +10,7 @@ public class RatRunnable implements Runnable{
 	private RatStatus status = RatStatus.alive;
 	private Grocery grocery;
 	private Date lastEaten;
-	
+	private int breadsEaten = 0;
 	
 	public RatRunnable(Grocery grocery) {
 		this.grocery = grocery;
@@ -22,8 +22,9 @@ public class RatRunnable implements Runnable{
 		while(status != RatStatus.dead){
 			try {
 				if(grocery.subBreads(1)){
+					this.breadsEaten++;
 					try {
-						Thread.sleep(100);
+						Thread.sleep(1000);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
@@ -61,5 +62,8 @@ public class RatRunnable implements Runnable{
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
+	}
+	public int getBreadsEaten(){
+		return this.breadsEaten;
 	}
 }

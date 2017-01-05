@@ -16,6 +16,8 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.Timer;
 import javax.swing.border.EmptyBorder;
+import java.awt.FlowLayout;
+import javax.swing.BoxLayout;
 
 
 public class RatClientGUI extends JFrame {
@@ -26,6 +28,8 @@ public class RatClientGUI extends JFrame {
 
 	
 	private static RatRunnable rat;
+	private JPanel panel_1;
+	private JLabel eatenBreadsLbl;
 	public static void main(String[] args) {
 		// Setting up the necessary objects
 		System.setProperty("java.security.policy", "client.policy");
@@ -77,9 +81,21 @@ public class RatClientGUI extends JFrame {
 		contentPane.add(ratPanel, BorderLayout.CENTER);
 		
 		ratPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),"Rat"));
+		ratPanel.setLayout(new BorderLayout(0, 0));
 		ratStatusLbl = new JLabel("ALIVE");
 		ratStatusLbl.setHorizontalAlignment(SwingConstants.CENTER);
-		ratPanel.add(ratStatusLbl);
+		ratPanel.add(ratStatusLbl, BorderLayout.NORTH);
+		
+		panel_1 = new JPanel();
+		panel_1.setOpaque(false);
+		ratPanel.add(panel_1);
+		
+		JLabel lblNewLabel = new JLabel("eaten breads: ");
+		lblNewLabel.setToolTipText("");
+		panel_1.add(lblNewLabel);
+		
+		eatenBreadsLbl = new JLabel("0");
+		panel_1.add(eatenBreadsLbl);
 		
 //		JPanel rat1Panel = new JPanel();
 //		rat1Panel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),"Rat1"));
@@ -94,13 +110,14 @@ public class RatClientGUI extends JFrame {
 		ActionListener listener = new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				updateRat(rat, ratStatusLbl, ratPanel);
+				updateRat(rat, ratStatusLbl, ratPanel, eatenBreadsLbl);
 			}
 		};
 		Timer SimpleTimer = new Timer(500, listener);
 		SimpleTimer.start();
 	}
-	private void updateRat(RatRunnable rat,JLabel lbl, JPanel panel){
+	private void updateRat(RatRunnable rat,JLabel lbl, JPanel panel, JLabel eatenBreadsLbl){
+		eatenBreadsLbl.setText(Integer.toString(rat.getBreadsEaten()));
 		switch (rat.getStatus()){
 			case alive:
 				lbl.setText("ALIVE");

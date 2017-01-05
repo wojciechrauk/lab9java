@@ -14,4 +14,6 @@ public interface Grocery extends Remote  {
 	public int getInDelivery() throws RemoteException;
 	
 	public void printStatus() throws RemoteException;
+	
+	public void setInDelivery(int amount) throws RemoteException;
 }

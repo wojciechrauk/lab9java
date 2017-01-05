@@ -42,15 +42,9 @@ public class GroceryImpl extends UnicastRemoteObject implements Grocery{
 	public synchronized int getInDelivery() throws RemoteException{
 		return this.inDelivery;
 	}
-//	public synchronized void orderFromBakery(int toDeliver){
-//		this.inDelivery += toDeliver;
-//		long startTime = System.currentTimeMillis();
-//		System.out.println("Grocery " + Thread.currentThread().getName());
-//		synchronized(bakery){
-//			bakery.getBreads(this, toDeliver);
-//		}
-//	}
-
+	public synchronized void setInDelivery(int amount) throws RemoteException{
+		this.inDelivery = amount;
+	}
 
 	@Override
 	public void printStatus() throws RemoteException {
