@@ -5,6 +5,8 @@ import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.rmi.RMISecurityManager;
 
 import javax.naming.Context;
@@ -16,16 +18,28 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.Timer;
 import javax.swing.border.EmptyBorder;
+import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
+import javax.swing.JComboBox;
+import java.awt.FlowLayout;
+import javax.swing.BoxLayout;
+import java.awt.GridLayout;
+import javax.swing.JSplitPane;
+import javax.swing.JButton;
 
 
 public class ClientClientGUI extends JFrame {
 
 	private JPanel contentPane;
-	private JPanel ratPanel;
-	private JLabel ratStatusLbl;
+	private JPanel mainPanel;
+	private JLabel orderLbl;
 
 	
-	private static RatRunnable rat;
+	private static Client client;
+	private JComboBox selectedValue;
+	private JPanel panel;
+	private JPanel panel_1;
+	private JButton btnBuy;
 	public static void main(String[] args) {
 		// Setting up the necessary objects
 		System.setProperty("java.security.policy", "client.policy");
@@ -37,9 +51,9 @@ public class ClientClientGUI extends JFrame {
 			Grocery grocery = (Grocery) namingContext.lookup(url + "grocery");
 			grocery.printStatus();
 		
-			rat = new RatRunnable(grocery);
-			Thread ratThread1 = new Thread(rat, "RAT");
-			ratThread1.start();
+			client = new Client(grocery);
+			Thread clientThread = new Thread(client, "CLIENT");
+			clientThread.start();
 			
 			grocery.printStatus();
 			grocery.addBreads(1);
@@ -76,50 +90,39 @@ public class ClientClientGUI extends JFrame {
 		setBounds(100, 100, 200, 150);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-		contentPane.setLayout(new BorderLayout(0, 0));
 		setContentPane(contentPane);
+		contentPane.setLayout(new BorderLayout(0, 0));
 		
-		ratPanel = new JPanel();
-		contentPane.add(ratPanel, BorderLayout.CENTER);
+		mainPanel = new JPanel();
 		
-		ratPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),"Rat"));
-		ratStatusLbl = new JLabel("ALIVE");
-		ratStatusLbl.setHorizontalAlignment(SwingConstants.CENTER);
-		ratPanel.add(ratStatusLbl);
+		mainPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),"Client"));
+		contentPane.add(mainPanel);
+		mainPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 		
-//		JPanel rat1Panel = new JPanel();
-//		rat1Panel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),"Rat1"));
-//		ratsPanel.add(rat1Panel);
-//		rat1Panel.setLayout(new BorderLayout(0, 0));
-//		
-//		rat1StatusLbl = new JLabel("ALIVE");
-//		rat1StatusLbl.setHorizontalAlignment(SwingConstants.CENTER);
-//		rat1Panel.add(rat1StatusLbl);
+		panel = new JPanel();
+		mainPanel.add(panel);
+		orderLbl = new JLabel("Make you order");
+		panel.add(orderLbl);
+		orderLbl.setHorizontalAlignment(SwingConstants.CENTER);
+		
+		panel_1 = new JPanel();
+		mainPanel.add(panel_1);
+		
+		String[] avaliableSelections = {"1", "2", "3"};
+		selectedValue = new JComboBox(avaliableSelections);
+		panel_1.add(selectedValue);
+		
+		btnBuy = new JButton("Buy");
+		panel_1.add(btnBuy);
 	}
 	private void createEvents(){
-		ActionListener listener = new ActionListener(){
+		btnBuy.addMouseListener(new MouseAdapter() {
 			@Override
-			public void actionPerformed(ActionEvent e) {
-				updateRat(rat, ratStatusLbl, ratPanel);
+			public void mouseClicked(MouseEvent arg0) {
+				int numberOfBreads = Integer.parseInt((String) selectedValue.getSelectedItem());
+				client.buyBread(numberOfBreads);
 			}
-		};
-		Timer SimpleTimer = new Timer(500, listener);
-		SimpleTimer.start();
+		});
 	}
-	private void updateRat(RatRunnable rat,JLabel lbl, JPanel panel){
-		switch (rat.getStatus()){
-			case alive:
-				lbl.setText("ALIVE");
-				panel.setBackground(Color.green);
-				break;
-			case sleeping:
-				lbl.setText("SLEEPING");
-				panel.setBackground(Color.lightGray);
-				break;
-			case dead:
-				lbl.setText("DEAD");
-				panel.setBackground(Color.darkGray);
-				break;
-		}
-	}
+
 }
