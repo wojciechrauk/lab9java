@@ -41,12 +41,6 @@ public class RatClientGUI extends JFrame {
 			Thread ratThread1 = new Thread(rat, "RAT");
 			ratThread1.start();
 			
-			grocery.printStatus();
-			grocery.addBreads(1);
-			grocery.printStatus();
-			Thread.sleep(1000);
-			
-			grocery.printStatus();
 		} catch (Exception e) {
 			System.err.println("Cannot establish connection with the server, " + e.getMessage());
 		//	e.printStackTrace();

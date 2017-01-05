@@ -3,7 +3,7 @@ package lab9;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
-public class Server {
+public class Server{
 	
 	public static void main(String args[]) {
 		try {

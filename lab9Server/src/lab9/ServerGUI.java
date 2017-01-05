@@ -8,6 +8,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.rmi.RMISecurityManager;
+import java.rmi.RemoteException;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -26,20 +27,19 @@ import javax.swing.BoxLayout;
 import java.awt.GridLayout;
 import javax.swing.JSplitPane;
 import javax.swing.JButton;
+import java.awt.Font;
 
 
-public class ClientClientGUI extends JFrame {
+public class ServerGUI extends JFrame {
 
 	private JPanel contentPane;
 	private JPanel mainPanel;
-	private JLabel orderLbl;
 
 	
-	private static Client client;
-	private JComboBox selectedValue;
-	private JPanel panel;
+	private static GroceryImpl grocery;
 	private JPanel panel_1;
-	private JButton btnBuy;
+	private JLabel breadsLbl;
+	private JLabel inDeliveryLbl;
 	public static void main(String[] args) {
 		// Setting up the necessary objects
 		System.setProperty("java.security.policy", "client.policy");
@@ -47,13 +47,12 @@ public class ClientClientGUI extends JFrame {
 		String url = "rmi://localhost/";
 	
 		try {
+			grocery = new GroceryImpl(50);
+			
 			Context namingContext = new InitialContext();
-			Grocery grocery = (Grocery) namingContext.lookup(url + "grocery");
-			grocery.printStatus();
-		
-			client = new Client(grocery);
-			Thread clientThread = new Thread(client, "CLIENT");
-			clientThread.start();
+			namingContext.rebind("rmi:grocery", grocery);
+			printLog("running");
+			printLog("Waiting for invocations from clients...");
 			
 		} catch (Exception e) {
 			System.err.println("Cannot establish connection with the server, " + e.getMessage());
@@ -65,7 +64,7 @@ public class ClientClientGUI extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					ClientClientGUI frame = new ClientClientGUI();
+					ServerGUI frame = new ServerGUI();
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -75,13 +74,13 @@ public class ClientClientGUI extends JFrame {
 	}
 
 
-	public ClientClientGUI() {
+	public ServerGUI() {
 		initComponents();
 		createEvents();	
 	}
 	private void initComponents(){
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 200, 150);
+		setBounds(100, 100, 250, 160);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -89,34 +88,51 @@ public class ClientClientGUI extends JFrame {
 		
 		mainPanel = new JPanel();
 		
-		mainPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),"Client"));
+		mainPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),"SERVER - grocery statistics"));
 		contentPane.add(mainPanel);
 		mainPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 		
-		panel = new JPanel();
+		JPanel panel = new JPanel();
 		mainPanel.add(panel);
-		orderLbl = new JLabel("Make you order");
-		panel.add(orderLbl);
-		orderLbl.setHorizontalAlignment(SwingConstants.CENTER);
+		JLabel breadsDescrLbl = new JLabel("Breads: ");
+		breadsDescrLbl.setFont(new Font("Dialog", Font.BOLD, 20));
+		panel.add(breadsDescrLbl);
+		breadsDescrLbl.setHorizontalAlignment(SwingConstants.LEFT);
+		
+		breadsLbl = new JLabel("0");
+		breadsLbl.setFont(new Font("Dialog", Font.BOLD, 20));
+		breadsLbl.setHorizontalAlignment(SwingConstants.LEFT);
+		panel.add(breadsLbl);
 		
 		panel_1 = new JPanel();
 		mainPanel.add(panel_1);
 		
-		String[] avaliableSelections = {"1", "2", "3"};
-		selectedValue = new JComboBox(avaliableSelections);
-		panel_1.add(selectedValue);
+		JLabel lblNewLabel = new JLabel("In delivery: ");
+		lblNewLabel.setFont(new Font("Dialog", Font.BOLD, 20));
+		panel_1.add(lblNewLabel);
 		
-		btnBuy = new JButton("Buy");
-		panel_1.add(btnBuy);
+		inDeliveryLbl = new JLabel("0");
+		inDeliveryLbl.setFont(new Font("Dialog", Font.BOLD, 20));
+		inDeliveryLbl.setHorizontalAlignment(SwingConstants.LEFT);
+		panel_1.add(inDeliveryLbl);
 	}
 	private void createEvents(){
-		btnBuy.addMouseListener(new MouseAdapter() {
+		ActionListener listener = new ActionListener(){
 			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				int numberOfBreads = Integer.parseInt((String) selectedValue.getSelectedItem());
-				client.buyBread(numberOfBreads);
+			public void actionPerformed(ActionEvent e) {
+				try {
+					breadsLbl.setText(Integer.toString(grocery.getCurrentBreads()));
+					inDeliveryLbl.setText(Integer.toString(grocery.getInDelivery()));
+				} catch (RemoteException e1) {
+					e1.printStackTrace();
+				}
 			}
-		});
+		};
+		Timer SimpleTimer = new Timer(500, listener);
+		SimpleTimer.start();
 	}
 
+	private static void printLog(String message){
+		System.out.println("[SERVER]: " + message);
+	}
 }
